@@ -13,17 +13,15 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AUDIO_FOLDER = os.path.join(BASE_DIR, os.getenv('AUDIO_FOLDER'))
 TEMPLATES_FOLDER = os.path.join(BASE_DIR, os.getenv('TEMPLATES_FOLDER'))
 
-@app.get("/{phone}")
-async def serve_audio(phone: str):
-    
+@app.get("/{folder}/{phone}")
+async def serve_audio(folder: str, phone: str):
     filename = phone
-    
-    if not (filename.endswith('.wav')):
+    if not filename.endswith('.wav'):
         raise HTTPException(status_code=400, detail="Invalid file type")
-    file_path = os.path.join(AUDIO_FOLDER, filename)
+    file_path = os.path.join(AUDIO_FOLDER, folder, filename)
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(file_path, media_type="audio/mpeg" if filename.endswith('.mp3') else "audio/wav")
+    return FileResponse(file_path, media_type="audio/wav")
 
 @app.get("/", response_class=HTMLResponse)
 async def index():
