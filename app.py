@@ -10,7 +10,8 @@ load_dotenv()
 app = FastAPI()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-AUDIO_FOLDER = os.path.join(BASE_DIR, os.getenv('AUDIO_FOLDER'))
+raw_audio_folder = os.getenv('AUDIO_FOLDER')
+AUDIO_FOLDER = os.path.expanduser(raw_audio_folder) if raw_audio_folder else None
 TEMPLATES_FOLDER = os.path.join(BASE_DIR, os.getenv('TEMPLATES_FOLDER'))
 
 @app.get("/{folder}/{phone}")
@@ -18,7 +19,9 @@ async def serve_audio(folder: str, phone: str):
     filename = phone
     if not filename.endswith('.wav'):
         raise HTTPException(status_code=400, detail="Invalid file type")
+
     file_path = os.path.join(AUDIO_FOLDER, folder, filename)
+
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="File not found")
     return FileResponse(file_path, media_type="audio/wav")
